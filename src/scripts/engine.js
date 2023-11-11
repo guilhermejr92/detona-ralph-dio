@@ -51,7 +51,7 @@ function gameOver() {
     clearInterval(state.actions.countDownTimerId);
     clearInterval(state.actions.timerId);
 
-    // Reinicia o jogo após um atraso de 2 segundos (ajuste conforme necessário)
+    // Reinicia o jogo após um atraso de 2 segundos
     setTimeout(restartGame, 2000);
 }
 
