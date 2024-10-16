@@ -9,7 +9,6 @@
     display: flex;
     justify-content: space-evenly;
     align-items: center;
-
     height: 90px;
     width: 100%;
     background-color: #000000;
@@ -29,6 +28,12 @@
     width: 150px;
     border: 1px solid #000000;
     background-color: #1aeaa5;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.square:hover {
+    cursor: pointer;
+    transform: scale(1.05);
 }
 
 .enemy {
@@ -58,4 +63,22 @@
     padding: 20px;
     border-radius: 10px;
     color: #fff;
+}
+
+.leaderboard {
+    display: none;
+    text-align: center;
+    margin-top: 20px;
+}
+
+#score-list {
+    list-style-type: none;
+    color: #fff;
+}
+
+#score-list li {
+    background-color: #333;
+    margin: 5px 0;
+    padding: 10px;
+    border-radius: 5px;
 }

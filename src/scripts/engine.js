@@ -6,17 +6,21 @@ const state = {
         livesDisplay: document.querySelector("#lives"),
     },
     values: {
-        gameVelocity: 1000,
+        gameVelocity: 1200, // Velocidade inicial do jogo
+        initialVelocity: 1000, // Valor para resetar a velocidade ao reiniciar
         hitPosition: 0,
         result: 0,
         currentTime: 30,
         lives: 3,
         gameActive: true,
+        speedIncrement: 100, // Valor de incremento da velocidade por acerto
+        maxVelocity: 300 // Velocidade mínima que o jogo pode atingir
     },
     actions: {
         countDownTimerId: null,
         timerId: null,
     },
+    leaderboard: []
 };
 
 function countDown() {
@@ -31,52 +35,39 @@ function countDown() {
 }
 
 function gameOver() {
-    if (!state.values.gameActive) {
-        return;
-    }
+    if (!state.values.gameActive) return;
 
     state.values.gameActive = false;
-
-    // Reproduz o som de "Game Over"
     playGameOverSound();
 
-    // Exibe a mensagem de Game Over no HTML
     const gameOverMessage = document.getElementById("game-over-message");
     const finalResult = document.getElementById("final-result");
     finalResult.textContent = state.values.result;
-
     gameOverMessage.style.display = "block";
 
-    // Limpa todos os intervalos de tempo existentes
     clearInterval(state.actions.countDownTimerId);
     clearInterval(state.actions.timerId);
 
-    // Reinicia o jogo após um atraso de 2 segundos
-    setTimeout(restartGame, 2000);
+    saveToLeaderboard(state.values.result);
+    displayLeaderboard();
 }
 
 function restartGame() {
-    // Esconde a mensagem de Game Over
     const gameOverMessage = document.getElementById("game-over-message");
     gameOverMessage.style.display = "none";
 
-    // Reinicia o jogo
     state.values.gameActive = true;
     state.values.lives = 3;
     state.values.currentTime = 30;
     state.values.result = 0;
-    updateLivesDisplay();
+    state.values.gameVelocity = state.values.initialVelocity; // Reseta a velocidade
 
-    // Atualiza o elemento de pontuação
+    updateLivesDisplay();
     state.view.score.textContent = state.values.result;
 
-    // Inicia os intervalos de tempo novamente
     state.actions.countDownTimerId = setInterval(countDown, 1000);
-
-    // Limpa o intervalo de movimento do inimigo
     clearInterval(state.actions.timerId);
 
-    // Inicia o movimento do inimigo novamente
     moveEnemy();
 }
 
@@ -86,10 +77,8 @@ function loseLife() {
         updateLivesDisplay();
 
         if (state.values.lives > 0) {
-            // Se ainda houver vidas, continue o jogo
             moveEnemy();
         } else {
-            // Se não houver mais vidas, chame a função de game over
             gameOver();
         }
     }
@@ -123,31 +112,59 @@ function randomSquare() {
 }
 
 function moveEnemy() {
-    state.actions.timerId = setInterval(randomSquare, state.values.gameVelocity);
+    state.actions.timerId = setInterval(() => {
+        randomSquare();
+
+        if (state.values.result % 10 === 0 && state.values.result !== 0) {
+            state.values.gameVelocity -= 100; // Aumenta a dificuldade mais rapidamente a cada 10 acertos
+        } else {
+            state.values.gameVelocity -= state.values.speedIncrement; // Diminui um pouco a cada acerto normal
+        }
+
+        if (state.values.gameVelocity < state.values.maxVelocity) {
+            state.values.gameVelocity = state.values.maxVelocity; // Impede que a velocidade fique muito rápida
+        }
+
+        clearInterval(state.actions.timerId);
+        moveEnemy(); // Reinicia o movimento mais rápido
+    }, state.values.gameVelocity);
 }
 
 function onSquareClick() {
     if (state.values.gameActive && this.id === state.values.hitPosition) {
         state.values.result++;
         state.view.score.textContent = state.values.result;
-        state.values.hitPosition = null;
         playSound();
+
+        clearInterval(state.actions.timerId); // Interrompe o inimigo atual
+        moveEnemy(); // Reinicia o movimento após o acerto
     } else {
         loseLife();
     }
 }
 
-function addListenerHitBox() {
-    state.view.squares.forEach((square) => {
-        square.addEventListener("mousedown", onSquareClick);
+state.view.squares.forEach(square => square.addEventListener("click", onSquareClick));
+
+function saveToLeaderboard(score) {
+    state.leaderboard.push(score);
+    state.leaderboard.sort((a, b) => b - a);
+}
+
+function displayLeaderboard() {
+    const leaderboard = document.getElementById("leaderboard");
+    const scoreList = document.getElementById("score-list");
+    scoreList.innerHTML = '';
+
+    state.leaderboard.forEach(score => {
+        const li = document.createElement("li");
+        li.textContent = `Pontuação: ${score}`;
+        scoreList.appendChild(li);
     });
+
+    leaderboard.style.display = "block";
 }
 
-function init() {
-    moveEnemy();
-    addListenerHitBox();
-    updateLivesDisplay();
-    state.actions.countDownTimerId = setInterval(countDown, 800);
-}
+// Inicializa o jogo
+state.actions.countDownTimerId = setInterval(countDown, 1000);
+moveEnemy();
 
-init();
