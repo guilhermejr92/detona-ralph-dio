@@ -12,6 +12,7 @@ Aumento de Velocidade Gradual: A cada acerto, a velocidade do Ralph aumenta, e a
 
 
 🕹️ Como Jogar
+
 Clique no Ralph: O Ralph aparecerá em posições aleatórias em uma grade 3x3.
 Acumule Pontos: A cada acerto, sua pontuação aumenta.
 Cuidado com o Tempo e as Vidas: O jogo termina se o tempo acabar ou se você perder todas as vidas.
